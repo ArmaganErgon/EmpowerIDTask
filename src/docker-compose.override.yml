@@ -1,0 +1,37 @@
+version: '3.4'
+
+services:
+  blogservice:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8001
+      - "ConnectionStrings__PostsDB=Server=blogdb,1433;Database=posts;User=sa;Password=TestSA1234;TrustServerCertificate=true"
+      - "Redis__ConnectionString=blogredis:6379"
+      - "Authority=http://authenticationservice:8002"
+    ports:
+        - "8001:8001"
+  
+  db:
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=TestSA1234
+    ports:
+      - "1433:1433"
+  
+  cache:
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes: 
+      - cache:/data
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
+  authenticationservice:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8002
+      - "Issuer=http://authenticationservice:8002"
+    ports:
+      - "8002:8002"
+

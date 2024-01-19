@@ -1,0 +1,31 @@
+version: '3.4'
+
+services:
+  blogservice:
+    image: ${DOCKER_REGISTRY-}blogservice
+    container_name: blogservice
+    build:
+      context: .
+      dockerfile: BlogService/Dockerfile
+    depends_on:
+      - db
+      - cache
+      - authenticationservice
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: blogdb
+
+  cache:
+    image: redis:latest
+    container_name: blogredis
+
+  authenticationservice:
+    image: ${DOCKER_REGISTRY-}authenticationservice
+    container_name: authenticationservice
+    build:
+      context: .
+      dockerfile: AuthenticationService/Dockerfile
+
+volumes:
+    cache:
+        driver: local
