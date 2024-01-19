@@ -9,7 +9,7 @@ Run TestApp
 
 Documentation explanations:
 
-C4 Views: Includes System, Container and Component views for C4 Model.
+C4 Views.pdf: Includes System, Container and Component views for C4 Model.
 
 Containers.png: Screenshot of container list in Docker desktop
 
