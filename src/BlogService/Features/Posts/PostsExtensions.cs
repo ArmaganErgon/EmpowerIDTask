@@ -25,7 +25,7 @@ public static class PostsExtensions
         services.AddScoped<IRepository<Post>, PostsRepository>();
         services.AddScoped<IRepository<Comment>, CommentsRepository>();
 
-        services.AddScoped<IQueryHandler<GetPostRequest, GetPostResponse>, GetPostHandler>();
+        services.AddScoped<IQueryHandler<GetPostRequest, GetPostResponse?>, GetPostHandler>();
         services.AddScoped<ICommandHandler<CreatePostRequest, CreatePostResponse>, CreatePostHandler>();
         services.AddScoped<ICommandHandler<CreateCommentRequest, CreateCommentResponse>, CreateCommentHandler>();
 

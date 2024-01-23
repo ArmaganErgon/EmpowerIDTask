@@ -8,14 +8,14 @@ using System.Text.Json;
 namespace BlogService.Features.Posts.Application;
 
 public class GetPostHandler(IValidator<GetPostRequest> validator, IRepository<Post> repository, ICacheProvider cacheProvider)
-    : IQueryHandler<GetPostRequest, GetPostResponse>
+    : IQueryHandler<GetPostRequest, GetPostResponse?>
 {
     private readonly IValidator<GetPostRequest> validator = validator ?? throw new ArgumentNullException(nameof(validator));
     private readonly IRepository<Post> repository = repository ?? throw new ArgumentNullException(nameof(repository));
     private readonly ICacheProvider cacheProvider = cacheProvider ?? throw new ArgumentNullException(nameof(cacheProvider));
     private const string cacheKeyPrefix = "Post";
 
-    public async Task<GetPostResponse> Handle(GetPostRequest query, CancellationToken ct = default)
+    public async Task<GetPostResponse?> Handle(GetPostRequest query, CancellationToken ct = default)
     {
         await Validate(query, ct);
 
@@ -28,9 +28,9 @@ public class GetPostHandler(IValidator<GetPostRequest> validator, IRepository<Po
         }
 
         var entity = await repository.GetByIdAsync(query.Id, ct);
-        var response = entity.ToResponse();
+        var response = entity?.ToResponse();
 
-        if(entity is not null)
+        if(response is not null)
             await cacheProvider.AddAsync(cacheKey, JsonSerializer.Serialize(response), TimeSpan.FromMinutes(5), ct);
 
         return response;

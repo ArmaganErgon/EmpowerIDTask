@@ -23,20 +23,25 @@ namespace BlogService.Features.Posts.Apis
         [Produces(MediaTypeNames.Application.Json)]
         [ProducesResponseType(typeof(GetPostResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Get([BindRequired] long id)
+        public async Task<IResult> Get([BindRequired] long id,  CancellationToken ct)
         {
-            return new JsonResult(await queryBus.Dispatch<GetPostRequest, GetPostResponse>(new(id)));
+            var post = await queryBus.Dispatch<GetPostRequest, GetPostResponse?>(new(id), ct);
+            if(post is null)
+                return TypedResults.NotFound();
+
+            return TypedResults.Ok(post);
         }
 
         [HttpPost]
         [RequireScope("post.create")]
         [Consumes(MediaTypeNames.Application.Json)]
         [Produces(MediaTypeNames.Application.Json)]
-        [ProducesResponseType(typeof(CreatePostResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(CreatePostResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Create([FromBody] CreatePostRequest request)
+        public async Task<IResult> Create([FromBody] CreatePostRequest request, CancellationToken ct)
         {
-            return new JsonResult(await commandBus.Dispatch<CreatePostRequest, CreatePostResponse>(request));
+            var createResult = await commandBus.Dispatch<CreatePostRequest, CreatePostResponse>(request, ct);
+            return TypedResults.Created(Url.Action(nameof(Get), new { id = createResult.Id }), createResult);
         }
 
         [HttpPost]
@@ -44,11 +49,12 @@ namespace BlogService.Features.Posts.Apis
         [RequireScope("comment.create")]
         [Consumes(MediaTypeNames.Application.Json)]
         [Produces(MediaTypeNames.Application.Json)]
-        [ProducesResponseType(typeof(CreatePostResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(CreateCommentResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateComment([FromBody] CreateCommentRequest request)
+        public async Task<IResult> CreateComment([FromBody] CreateCommentRequest request, CancellationToken ct)
         {
-            return new JsonResult(await commandBus.Dispatch<CreateCommentRequest, CreateCommentResponse>(request));
+            var createResult = await commandBus.Dispatch<CreateCommentRequest, CreateCommentResponse>(request, ct);
+            return TypedResults.Created(Url.Action(nameof(Get), new { id = createResult.Id }), createResult);
         }
     }
 }
